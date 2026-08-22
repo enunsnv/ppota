@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Script from "next/script";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -52,6 +53,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        {" "}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5178512088906089"
+          crossorigin="anonymous"
+        ></script>
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

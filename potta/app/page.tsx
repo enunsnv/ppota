@@ -76,7 +76,7 @@ const PASTEL_COLORS = [
 
 export default function Home() {
   const [lang, setLang] = useState<"ko" | "en" | "ja">("ko");
-  const [minutesInput, setMinutesInput] = useState<number>(25);
+  const [minutesInput, setMinutesInput] = useState<string>(25);
   const [timeLeft, setTimeLeft] = useState<number>(25 * 60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>("#FF6B6B");
@@ -114,10 +114,24 @@ export default function Home() {
   }, [isRunning, timeLeft, lang]);
 
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Math.max(1, Math.min(60, Number(e.target.value)));
-    setMinutesInput(val);
-    if (!isRunning) {
-      setTimeLeft(val * 60);
+    const val = e.target.value;
+
+    // 지우는 중(빈 문자열)은 타이핑 편의를 위해 허용
+    if (val === "") {
+      setMinutesInput("");
+      return;
+    }
+
+    const numVal = Number(val);
+
+    // 60 이하의 숫자만 입력 허용
+    if (!isNaN(numVal) && numVal <= 60) {
+      setMinutesInput(val);
+
+      // 1~60 정상 범위일 때만 실시간 타이머 반응
+      if (!isRunning && numVal >= 1) {
+        setTimeLeft(numVal * 60);
+      }
     }
   };
 
@@ -133,6 +147,19 @@ export default function Home() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
+  const handleTimeInputBlur = () => {
+    let numVal = Number(minutesInput);
+
+    // 숫자가 아니거나 1 미만(빈 값 포함)이면 기본값 25로 보정
+    if (isNaN(numVal) || numVal < 1) {
+      numVal = 25;
+    }
+
+    setMinutesInput(String(numVal));
+    if (!isRunning) {
+      setTimeLeft(numVal * 60);
+    }
+  };
   const getPiePath = (ratio: number) => {
     if (ratio <= 0) return "";
     const cx = 100;
@@ -301,6 +328,7 @@ export default function Home() {
               type="number"
               value={minutesInput}
               onChange={handleTimeInputChange}
+              onBlur={handleTimeInputBlur} // 포커스 해제 시 1~60 범위 자동 보정
               min={1}
               max={60}
               className="w-16 px-2 py-1 text-center rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-extrabold outline-none text-sm text-gray-800 dark:text-gray-100"
